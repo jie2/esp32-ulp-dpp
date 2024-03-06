@@ -1,21 +1,16 @@
-idf_component_register(SRCS "ulp_adc_example_main.c" 
-                    INCLUDE_DIRS ""
-                    REQUIRES soc nvs_flash ulp driver esp_adc esp_event esp_wifi vfs)
-#
-# ULP support additions to component CMakeLists.txt.
-#
-# 1. The ULP app name must be unique (if multiple components use ULP).
-set(ulp_app_name ulp_${COMPONENT_NAME})
-#
-# 2. Specify all assembly source files.
-#    Files should be placed into a separate directory (in this case, ulp/),
-#    which should not be added to COMPONENT_SRCS.
-set(ulp_s_sources "ulp/adc.S")
-#
-# 3. List all the component source files which include automatically
-#    generated ULP export file, ${ulp_app_name}.h:
-set(ulp_exp_dep_srcs "ulp_adc_example_main.c")
-#
-# 4. Call function to build ULP binary and embed in project using the argument
-#    values above.
-ulp_embed_binary(${ulp_app_name} "${ulp_s_sources}" "${ulp_exp_dep_srcs}")
+# The following lines of boilerplate have to be in your project's CMakeLists
+# in this exact order for cmake to work correctly
+cmake_minimum_required(VERSION 3.5)
+
+if(DEFINED ENV{RMAKER_PATH})
+  set(RMAKER_PATH $ENV{RMAKER_PATH})
+else()
+  set(RMAKER_PATH ${CMAKE_CURRENT_LIST_DIR}/../..)
+endif(DEFINED ENV{RMAKER_PATH})
+
+# Add RainMaker components and other common application components
+set(EXTRA_COMPONENT_DIRS ${RMAKER_PATH}/components/esp-insights/components ${RMAKER_PATH}/components ${RMAKER_PATH}/examples/common)
+
+set(PROJECT_VER "1.0")
+include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+project(adc_sensor)
