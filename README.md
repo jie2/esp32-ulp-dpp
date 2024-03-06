@@ -3,6 +3,10 @@
 
 # ULP-DPP V3
 
+Repositories required: ESP-32 RainMaker
+https://rainmaker.espressif.com/docs/get-started.html
+
+
 Based on the ULP ADC example, this board goes into deep sleep and wakes up at increasing voltage levels (SOC measured at >50), around >3.1V. Two voltage measurements are taken with 4.08s time interval in-between, and a value for SOC is calculated by subtracting the two values. This determines if the supply is increasing or decreasing, and has the system adjust states between deep-sleep and active mode accordingly. ESP-RainMaker is used to upload data (Temperature readings, ADC readings, and SOC) onto the cloud and retrievable through the mobile app. 
 
 
