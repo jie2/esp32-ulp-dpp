@@ -16,4 +16,5 @@ Issues:
 3. No measurements can be conducted in hibernate mode, so any increase or decrease in that 1s duration won't be registered.
 4. Data is not retained after brownout (supply drop).
 5. Wi-Fi is initialized but not implemented.
+6. Sleep instructions don't work on the S2 and S3, hence redundant in the code.
 
