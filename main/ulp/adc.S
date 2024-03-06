@@ -637,13 +637,13 @@ measure:
 	move r3, low_thr
 	ld r3, r3, 0
 	sub r3, r0, r3
-	jump wake_up, ov
+	jump hibernate1, ov
 
 	//goes to sleep if negative detected 	
 	move r3, higher_thr
 	ld r3, r3, 0
 	sub r3, r3, r0
-	jump wake_up, ov
+	jump hibernate2, ov
 
 	/* compare with high_thr; wake up if value > high_thr */
 	move r3, high_thr 
@@ -652,7 +652,7 @@ measure:
 	jump wake_up , ov 
 
 
-	jump measure
+	jump hibernate1
 
 	.global hibernate1 //stable
 hibernate1:
