@@ -10,3 +10,7 @@ This timer determines when the board awakes from hibernate mode and performs tas
 Time between measurements: 4.08s
 This is set by the number of WAITs in deep-sleep.
 
+Issues:
+1. A high threshold isn't set, so there's a possibility of the board waking up from a random voltage spike.
+2. ADC PIN7 is grounded for all measurements, but 
+
