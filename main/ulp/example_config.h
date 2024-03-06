@@ -12,6 +12,8 @@
 #define EXAMPLE_ADC_ATTEN       0 // ADC_ATTEN_DB_11
 #define EXAMPLE_ADC_WIDTH       0 // ADC_BITWIDTH_DEFAULT
 
-/* Set low and high thresholds, approx. 3.00V - 3.30V*/
-#define EXAMPLE_ADC_LOW_TRESHOLD   500
-#define EXAMPLE_ADC_HIGH_TRESHOLD   600
+/* Set low and high thresholds, approx. 2.80V - 3.00V*/
+#define EXAMPLE_ADC_LOW_TRESHOLD   90
+#define EXAMPLE_ADC_HIGH_TRESHOLD   100
+#define EXAMPLE_ADC_HIGHER_TRESHOLD   200
+#define EXAMPLE_ADC_HIGH   500
