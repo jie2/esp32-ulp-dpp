@@ -3,8 +3,8 @@
 
 # ULP ADC Example
 
-Based on the ULP ADC example, this code goes into deep sleep and wakes up at increasing voltage levels from 3.3V to take a temperature measurement from the ESP32 temperature sensor in active mode.
-When the voltage level goes under 
+Based on the ULP ADC example, this code goes into deep sleep and wakes up at increasing voltage levels from around 3.3V to take a temperature measurement from the ESP32 temperature sensor in active mode.
+When the voltage level goes under around 3.0V, the system hibernates until the next wakeup from ULP timer (every 1s).
 
 Taking immediate values of voltage, the system actively reacts to changes in voltage supply.
 
