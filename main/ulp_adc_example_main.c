@@ -265,10 +265,9 @@ static void init_ulp_program(void)
 
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
 
-    /* Set ULP wake up period to 10s */
+    /* Set ULP wake up period to 1s */
     ulp_set_wakeup_period(0, 1000000);
-    /* Set ULP wake up period 2  to 5s*/
-    ulp_set_wakeup_period(1, 500000);
+
 
 #if CONFIG_IDF_TARGET_ESP32
     /* Disconnect GPIO12 and GPIO15 to remove current drain through
