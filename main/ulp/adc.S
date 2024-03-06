@@ -1,3 +1,13 @@
+/*
+ * SPDX-FileCopyrightText: 2022 Espressif Systems (Shanghai) CO LTD
+ *
+ * SPDX-License-Identifier: Unlicense OR CC0-1.0
+ */
+/* ULP Example: using ADC in deep sleep */
+
+/* ULP assembly files are passed through C preprocessor first, so include directives
+   and C macros may be used in these files
+ */
 #include "soc/rtc_cntl_reg.h"
 #include "soc/soc_ulp.h"
 #include "example_config.h"
@@ -26,13 +36,25 @@ low_thr:
 high_thr:
 	.long 0
 
+	.global high
+high:
+	.long 0
+
 	/* Counter of measurements done */
 	.global sample_counter
 sample_counter:
 	.long 0
 
+	.global previous_result
+previous_result:
+	.long 0
+
 	.global last_result
 last_result:
+	.long 0
+
+	.global charge_state
+charge_state:
 	.long 0
 
 	/*store random reading from temperature sensor*/
@@ -42,6 +64,10 @@ temperature_result:
 
 	.global adc_reading
 adc_reading:
+	.long 0
+
+	.global higher_thr
+higher_thr:
 	.long 0
 
 	/* Code goes into .text section */
@@ -61,21 +87,538 @@ entry:
 	stage_rst
 
 measure:
-	/* measure current level and add value to accumulator */
-	adc r1, 0, adc_channel + 1 //saradc1
-	add r0, r0, r1
+	/*
+	tsens r1, 10
+	move r3, temperature_result
+	st r1, r3, 0
+	*/
 
-	/* divide accumulator by adc_oversampling_factor.
-	   Since it is chosen as a power of two, use right shift */
+	adc r1, 0, 7 //saradc1
+	add r0, r0, r1
 	rsh r0, r0, adc_oversampling_factor_log
-	/* averaged value is now in r0; store it into adc_reading */
 	move r3, adc_reading
 	st r0, r3, 0
 
-	/* measure current level and add value to accumulator */
+	/* measure first level */
 	adc r1, 1, adc_channel + 1 //saradc2
 	add r0, r0, r1
+	rsh r0, r0, adc_oversampling_factor_log
+	move r3, previous_result
+	st r0, r3, 0
 
+//waits for 680ms
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+		wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+		wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+		wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+		wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+		wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+
+
+
+
+	/* measure next level */
+	adc r1, 1, adc_channel + 1 //saradc2
+	add r0, r0, r1
+	
 	/* divide accumulator by adc_oversampling_factor.
 	   Since it is chosen as a power of two, use right shift */
 	rsh r0, r0, adc_oversampling_factor_log
@@ -83,40 +626,53 @@ measure:
 	move r3, last_result
 	st r0, r3, 0
 
-	/*
-	tsens r1, 10
-	move r3, temperature_result
-	st r1, r3, 0
-	*/
-	
+	move r3, previous_result
+	ld r1, r3, 0
+	sub r0, r0, r1
 
+	move r1, charge_state
+	st r0, r1, 0
+	
 	/* compare with low_thr; power down if value < low_thr */
 	move r3, low_thr
 	ld r3, r3, 0
 	sub r3, r0, r3
-	jump hibernate, ov
+	jump wake_up, ov
+
+	//goes to sleep if negative detected 	
+	move r3, higher_thr
+	ld r3, r3, 0
+	sub r3, r3, r0
+	jump wake_up, ov
 
 	/* compare with high_thr; wake up if value > high_thr */
 	move r3, high_thr 
 	ld r3, r3, 0
 	sub r3, r3, r0
-	jump wake_up, ov
+	jump wake_up , ov 
+
 
 	jump measure
 
-	.global hibernate
-hibernate:
+	.global hibernate1 //stable
+hibernate1:
+	/* ulp puts itself into sleep mode */
+	sleep 0
+	halt  
+
+
+	.global hibernate2 //discharge
+hibernate2:
 	/* ulp puts itself into sleep mode */
 	sleep 1
 	halt  
 
-	.global wake_up
-
+	.global wake_up 
 wake_up:
 	/* Check if the system can be woken up */
 	READ_RTC_FIELD(RTC_CNTL_LOW_POWER_ST_REG, RTC_CNTL_RDY_FOR_WAKEUP)
 	and r0, r0, 1
-	jump hibernate, eq 
+	jump hibernate1, eq 
 
 	/* Wake up the SoC, end program */
 	wake
