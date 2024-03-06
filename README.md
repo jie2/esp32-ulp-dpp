@@ -1,9 +1,11 @@
 | Supported Targets | ESP32 | ESP32-S2 |
 | ----------------- | ----- | -------- |
 
-# ULP ADC Example
+# ULP-DPP V3
 
 Based on the ULP ADC example, this board goes into deep sleep and wakes up at increasing voltage levels (SOC measured at >50), around >3.1V. Two voltage measurements are taken with 4.08s time interval in-between, and a value for SOC is calculated by subtracting the two values. This determines if the supply is increasing or decreasing, and has the system adjust states between deep-sleep and active mode accordingly.
+
+
 
 ULP Wakeup timer: 1s 
 This timer determines when the board awakes from hibernate mode and performs tasks in deep-sleep, which can be extended for longer.
