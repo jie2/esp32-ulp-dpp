@@ -1,3 +1,12 @@
+/* ULP Example
+
+   This example code is in the Public Domain (or CC0 licensed, at your option.)
+
+   Unless required by applicable law or agreed to in writing, this
+   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+   CONDITIONS OF ANY KIND, either express or implied.
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
@@ -36,6 +45,7 @@
 #include "lwip/sys.h"
 
 //CLOUD REPO
+
 
 
 #define EXAMPLE_ESP_WIFI_SSID      "Li Xin P30"
@@ -195,8 +205,9 @@ void app_main(void)
     ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
     wifi_init_sta();
     */
-    
+
     esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
+    
     if (cause != ESP_SLEEP_WAKEUP_ULP) {
         printf("Not ULP wakeup\n");
         init_ulp_program();
@@ -205,8 +216,12 @@ void app_main(void)
         printf("ULP did %"PRIu32" measurements since last reset\n", ulp_sample_counter & UINT16_MAX);
         printf("Thresholds:  low=%"PRIu32"  high=%"PRIu32"\n", ulp_low_thr, ulp_high_thr);
         ulp_last_result &= UINT16_MAX;
+        ulp_previous_result &= UINT16_MAX;
+        ulp_adc_reading &= UINT16_MAX;
+        printf("Value=%"PRIu32" was the previous result\n", ulp_previous_result);
         printf("Value=%"PRIu32" was %s threshold\n", ulp_last_result,
                 ulp_last_result < ulp_low_thr ? "below" : "above");
+        printf("SOC is %"PRIu32".\n", ulp_charge_state);
         printf("Value=%"PRIu32" was measured on ADC.\n", ulp_adc_reading);
         printf("Temperature value %.02f ℃ \n", tsens_value);
         printf("Value=%"PRIu32" was the temperature value sensed.\n", ulp_temperature_result & UINT16_MAX); 
@@ -239,15 +254,21 @@ static void init_ulp_program(void)
         .ulp_mode = ADC_ULP_MODE_FSM,
     };
 
+
     ESP_ERROR_CHECK(ulp_adc_init(&cfg));
 
     ulp_low_thr = EXAMPLE_ADC_LOW_TRESHOLD;
     ulp_high_thr = EXAMPLE_ADC_HIGH_TRESHOLD;
+    ulp_higher_thr = EXAMPLE_ADC_HIGHER_TRESHOLD;
+    ulp_high = EXAMPLE_ADC_HIGH;
+    
 
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
 
-    /* Set ULP wake up period to 1s */
+    /* Set ULP wake up period to 10s */
     ulp_set_wakeup_period(0, 1000000);
+    /* Set ULP wake up period 2  to 5s*/
+    ulp_set_wakeup_period(1, 500000);
 
 #if CONFIG_IDF_TARGET_ESP32
     /* Disconnect GPIO12 and GPIO15 to remove current drain through
@@ -265,7 +286,7 @@ static void start_ulp_program(void)
 {
     /* Reset sample counter */
     ulp_sample_counter = 0;
-
+ 
     /* Start the program */
     esp_err_t err = ulp_run(&ulp_entry - RTC_SLOW_MEM);
     ESP_ERROR_CHECK(err);
