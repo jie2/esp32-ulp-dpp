@@ -11,3 +11,4 @@ Taking immediate values of voltage, the system actively reacts to changes in vol
 Connections:
 Connect PIN7 (ADC) to Voltage Divider/Power Supply.
 
+System1-ADC - graph of measured ADC against Voltage Supply to ADC through Voltage Divider (120k(ohm) - 12k (ohm))
