@@ -93,7 +93,7 @@ measure:
 	st r1, r3, 0
 	*/
 
-	adc r1, 0, 7 //saradc1
+	adc r1, 1, adc_channel + 3 //saradc1
 	add r0, r0, r1
 	rsh r0, r0, adc_oversampling_factor_log
 	move r3, adc_reading
