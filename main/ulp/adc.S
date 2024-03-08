@@ -632,6 +632,12 @@ measure:
 
 	move r1, charge_state
 	st r0, r1, 0
+
+	/* compare with high_thr, if sus, sleep */
+	move r3, high
+	ld r3, r3, 0
+	sub r3, r3, r0
+	jump hibernate1 , ov 
 	
 	/* compare with low_thr; power down if value < low_thr */
 	move r3, low_thr
