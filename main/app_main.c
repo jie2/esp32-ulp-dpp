@@ -74,6 +74,33 @@ static void start_ulp_program(void);
 
 void app_main()
 {
+
+    esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
+    
+    if (cause != ESP_SLEEP_WAKEUP_ULP) {
+        printf("Not ULP wakeup\n");
+        printf("ULP did %"PRIu32" measurements since last reset\n", ulp_sample_counter & UINT16_MAX);
+        printf("Value=%"PRIu32" was measured on ADC.\n", ulp_adc_reading);
+
+        init_ulp_program();
+    } else {
+        printf("Deep sleep wakeup\n");
+        printf("ULP did %"PRIu32" measurements since last reset\n", ulp_sample_counter & UINT16_MAX);
+        printf("Thresholds:  low=%"PRIu32"  high=%"PRIu32"\n", ulp_low_thr, ulp_high_thr);
+        ulp_last_result &= UINT16_MAX;
+        ulp_previous_result &= UINT16_MAX;
+        ulp_adc_reading &= UINT16_MAX;
+
+
+        printf("Value=%"PRIu32" was the previous result.\n", ulp_previous_result);
+        printf("Value=%"PRIu32" was the last result, it is %s threshold\n", ulp_last_result,
+                ulp_last_result < ulp_low_thr ? "below" : "above");
+                
+        printf("Value=%"PRIu32" is the SOC\n", ulp_charge_state);
+
+        printf("Value=%"PRIu32" was measured on ADC.\n", ulp_adc_reading);
+        printf("Value=%"PRIu32" was the temperature value sensed.\n", ulp_temperature_result & UINT16_MAX); 
+    } 
     /* Initialize Application specific hardware drivers and
      * set initial state.
      */
@@ -109,7 +136,6 @@ void app_main()
     dpp_device = esp_rmaker_temp_sensor_device_create("DPP Sensor", NULL, app_get_measurement());
     esp_rmaker_device_add_param(dpp_device, esp_rmaker_param_create("ADC", NULL, esp_rmaker_float(true), PROP_FLAG_READ | PROP_FLAG_SIMPLE_TIME_SERIES));
     esp_rmaker_device_add_param(dpp_device, esp_rmaker_param_create("State of Charge", NULL, esp_rmaker_float(true), PROP_FLAG_READ | PROP_FLAG_TIME_SERIES));
-    
 
     esp_rmaker_node_add_device(node, dpp_device);
 
@@ -139,36 +165,7 @@ void app_main()
         abort();
     }
 
-    
-
-    esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
-    
-    if (cause != ESP_SLEEP_WAKEUP_ULP) {
-        printf("Not ULP wakeup\n");
-        printf("ULP did %"PRIu32" measurements since last reset\n", ulp_sample_counter & UINT16_MAX);
-        printf("Value=%"PRIu32" was measured on ADC.\n", ulp_adc_reading);
-
-        init_ulp_program();
-    } else {
-        printf("Deep sleep wakeup\n");
-        printf("ULP did %"PRIu32" measurements since last reset\n", ulp_sample_counter & UINT16_MAX);
-        printf("Thresholds:  low=%"PRIu32"  high=%"PRIu32"\n", ulp_low_thr, ulp_high_thr);
-        ulp_last_result &= UINT16_MAX;
-        ulp_previous_result &= UINT16_MAX;
-        ulp_adc_reading &= UINT16_MAX;
-
-        printf("Value=%"PRIu32" was the last result, it is %s threshold\n", ulp_last_result,
-                ulp_last_result < ulp_low_thr ? "below" : "above");
-
-        printf("Value=%"PRIu32" was the previous result.\n", ulp_previous_result);
-                
-        printf("Value=%"PRIu32" is the SOC\n", ulp_charge_state);
-
-        printf("Value=%"PRIu32" was measured on ADC.\n", ulp_adc_reading);
-        printf("Value=%"PRIu32" was the temperature value sensed.\n", ulp_temperature_result & UINT16_MAX); 
-    } 
-
-    vTaskDelay(100);
+    vTaskDelay(300);
 
     printf("Entering deep sleep\n\n");
 
@@ -193,6 +190,7 @@ static void init_ulp_program(void)
         .atten    = EXAMPLE_ADC_ATTEN,
         .ulp_mode = ADC_ULP_MODE_FSM,
     };
+    
 
 
     ESP_ERROR_CHECK(ulp_adc_init(&cfg));
@@ -205,7 +203,7 @@ static void init_ulp_program(void)
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
 
     /* Set ULP wake up period to 1s */
-    ulp_set_wakeup_period(0, 500000);
+    ulp_set_wakeup_period(0, 1000000);
 
 #if CONFIG_IDF_TARGET_ESP32
     /* Disconnect GPIO12 and GPIO15 to remove current drain through
