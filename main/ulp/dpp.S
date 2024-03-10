@@ -57,10 +57,6 @@ last_result:
 charge_state:
 	.long 0
 
-	.global condition
-condition:
-	.long 0
-
 	/*store random reading from temperature sensor*/
 	.global temperature_result
 temperature_result:
@@ -96,16 +92,13 @@ measure:
 	move r3, temperature_result
 	st r1, r3, 0
 	*/
-	move r0, 0
-	move r1, 0
-	move r3, 0
-	adc r1, 0, adc_channel + 1 //saradc1
+
+	adc r1, 1, adc_channel + 3 //saradc2
 	add r0, r0, r1
 	rsh r0, r0, adc_oversampling_factor_log
 	move r3, adc_reading
 	st r0, r3, 0
 
-	move r0, 0
 	/* measure first level */
 	adc r1, 1, adc_channel + 1 //saradc2
 	add r0, r0, r1
@@ -113,8 +106,344 @@ measure:
 	move r3, previous_result
 	st r0, r3, 0
 
-//waits for 680ms
+//waits for 4s
 	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+		wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+		wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+		wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+	wait 65535
+		wait 65535
 	wait 65535
 	wait 65535
 	wait 65535
@@ -300,12 +629,12 @@ measure:
 
 	move r1, charge_state
 	st r0, r1, 0
-
-	/* compare with low_thr; stable SOC, measure */
+	
+	/* compare with low_thr; power down if value < low_thr */
 	move r3, low_thr
 	ld r3, r3, 0
 	sub r3, r0, r3
-	jump measure, ov
+	jump hibernate, ov
 
 	//goes to sleep if negative detected 	
 	move r3, higher_thr
@@ -317,20 +646,15 @@ measure:
 	move r3, high_thr 
 	ld r3, r3, 0
 	sub r3, r3, r0
-	jump wake_up , ov
+	jump wake_up , ov 
 
+	jump hibernate
 
-
-	.global hibernate //stable
+	.global hibernate 
 hibernate:
-	move r1, 1
-	move r3, condition
-	st r1, r3, 0
-
-	sleep 0
 	/* ulp puts itself into sleep mode */
+	sleep 0
 	halt  
- 
 
 	.global wake_up 
 wake_up:
@@ -345,4 +669,3 @@ wake_up:
 	halt
 
 	/* value within range, end the program */
-
