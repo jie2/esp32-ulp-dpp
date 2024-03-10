@@ -9,9 +9,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define REPORTING_PERIOD   1 /* Seconds */
+#define REPORTING_PERIOD   0.1 /* Seconds */
 
 extern esp_rmaker_device_t *dpp_device;
 
 void app_driver_init(void);
+void app_sensor_update();
 float app_get_measurement();
