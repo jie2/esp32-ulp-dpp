@@ -13,8 +13,7 @@
 #define EXAMPLE_ADC_WIDTH       0 // ADC_BITWIDTH_DEFAULT
 
 /* Set low and high thresholds, approx. 2.80V - 3.00V*/
-#define EXAMPLE_ADC_LOW_TRESHOLD   15 //<measure
-#define EXAMPLE_ADC_HIGH_TRESHOLD   16 //>wakeup
-#define EXAMPLE_ADC_HIGHER_TRESHOLD   100 //hibernate
-#define EXAMPLE_ADC_HIGH   35 //>wakeup
-
+#define EXAMPLE_ADC_LOW_TRESHOLD   20 //stable -> hibernate
+#define EXAMPLE_ADC_HIGH_TRESHOLD   21 //wakeup
+#define EXAMPLE_ADC_HIGHER_TRESHOLD   65000//negative->hibernate
+#define EXAMPLE_ADC_HIGH   500 //wakeup from stable high, not implemented yet lol
