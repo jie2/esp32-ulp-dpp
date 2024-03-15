@@ -13,10 +13,9 @@ Time between measurements: 4.08s
 This is set by the number of WAITs in deep-sleep.
 
 Issues:
-1. A high threshold isn't set, so there's a possibility of the board waking up from random voltage spikes.
-2. ADC PIN7 is grounded for all measurements, results may vary with an open PIN7 due to adc reading.
-3. No measurements can be conducted in hibernate mode, so any increase or decrease in that 1s duration won't be registered.
-4. Data is not retained after brownout (supply drop).
-5. Wi-Fi is initialized but not implemented.
-6. Sleep instructions don't work on the S2 and S3, hence redundant in the code.
+1. ADC PIN7 is grounded for all measurements, results may vary with an open PIN7 due to adc reading.
+2. No measurements can be conducted in hibernate mode, so any increase or decrease in that 1s duration won't be registered.
+3. Data is not retained after brownout (supply drop).
+4. Wi-Fi is initialized but not implemented.
+5. Sleep instructions don't work on the S2 and S3, hence redundant in the code.
 
