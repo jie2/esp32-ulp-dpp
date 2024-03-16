@@ -37,7 +37,7 @@ static float g_charge;
 
 
 
-static void app_sensor_update()
+void app_sensor_update()
 {
     ulp_adc_reading &= UINT16_MAX;
     g_adc = ulp_adc_reading;
@@ -57,9 +57,6 @@ static void app_sensor_update()
             esp_rmaker_device_get_param_by_name(dpp_device, "State of Charge"),
             esp_rmaker_float(g_charge)
     );
-
-
-
 }
 
 float app_get_measurement()
