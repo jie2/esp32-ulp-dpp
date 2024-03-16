@@ -13,9 +13,12 @@
 
 #include "esp_sleep.h"
 #include "soc/rtc_cntl_reg.h"
+#include "soc/rtc_periph.h"
 #include "soc/sens_reg.h"
+
 #include "driver/gpio.h"
 #include "driver/rtc_io.h"
+
 #include "ulp.h"
 #include "ulp_main.h"
 #include "esp_adc/adc_oneshot.h"
@@ -37,6 +40,7 @@
 #include "esp_mac.h"
 #include "esp_event.h"
 #include "esp_log.h"
+#include "nvs.h"
 #include "nvs_flash.h"
 #include "esp_wifi.h"
 #include "esp_pm.h"
@@ -44,7 +48,11 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
-//rainmaker repos
+//rainmaker repos, definition for test purposes
+//#define RAINMAKER
+
+#ifdef RAINMAKER
+
 #include "esp_rmaker_core.h"
 #include "esp_rmaker_standard_params.h"
 #include "esp_rmaker_standard_devices.h"
@@ -54,10 +62,13 @@
 
 #include "app_priv.h"
 
+#endif
+
+#ifdef RAINMAKER
 static const char *TAG = "app_main";
 
 esp_rmaker_device_t *dpp_device;
-
+#endif
 //ULP repos
 extern const uint8_t ulp_main_bin_start[] asm("_binary_ulp_main_bin_start");
 extern const uint8_t ulp_main_bin_end[]   asm("_binary_ulp_main_bin_end");
@@ -72,13 +83,31 @@ static void init_ulp_program(void);
  */
 static void start_ulp_program(void);
 
+static void update_readings(esp_err_t);
+
+static void reclaim_readings(esp_err_t);
+
 void app_main()
 {
+    #ifdef RAINMAKER
+    /* Initialize Application specific hardware drivers and
+     * set initial state.
+     */
+    app_driver_init();
+    #endif
 
+    /* Initialize NVS. */
+    esp_err_t err = nvs_flash_init();
+    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        err = nvs_flash_init();
+    }
+    
     esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
     
     if (cause != ESP_SLEEP_WAKEUP_ULP) {
         printf("Not ULP wakeup\n");
+        reclaim_readings(err); //reclaim prev readings from NVS
         printf("ULP did %"PRIu32" measurements since last reset\n", ulp_sample_counter & UINT16_MAX);
         printf("Value=%"PRIu32" was measured on ADC.\n", ulp_adc_reading);
 
@@ -91,7 +120,6 @@ void app_main()
         ulp_previous_result &= UINT16_MAX;
         ulp_adc_reading &= UINT16_MAX;
 
-
         printf("Value=%"PRIu32" was the previous result.\n", ulp_previous_result);
         printf("Value=%"PRIu32" was the last result, it is %s threshold\n", ulp_last_result,
                 ulp_last_result < ulp_low_thr ? "below" : "above");
@@ -99,21 +127,10 @@ void app_main()
         printf("Value=%"PRIu32" is the SOC\n", ulp_charge_state);
 
         printf("Value=%"PRIu32" was measured on ADC.\n", ulp_adc_reading);
-        printf("Value=%"PRIu32" was the temperature value sensed.\n", ulp_temperature_result & UINT16_MAX); 
+        printf("Value=%"PRIu32" was the temperature value sensed.\n", ulp_temperature_result & UINT16_MAX);
+        update_readings(err); //update new readings to NVS
     } 
-    /* Initialize Application specific hardware drivers and
-     * set initial state.
-     */
-    app_driver_init();
-
-    /* Initialize NVS. */
-    esp_err_t err = nvs_flash_init();
-    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        err = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK( err );
-
+    #ifdef RAINMAKER
     /* Initialize Wi-Fi. Note that, this should be called before esp_rmaker_node_init()
      */
     app_wifi_init();
@@ -166,6 +183,7 @@ void app_main()
     }
 
     vTaskDelay(300);
+    #endif
 
     printf("Entering deep sleep\n\n");
 
@@ -183,6 +201,7 @@ static void init_ulp_program(void)
             (ulp_main_bin_end - ulp_main_bin_start) / sizeof(uint32_t));
     ESP_ERROR_CHECK(err);
 
+    /* ULP ADC configurations. */
     ulp_adc_cfg_t cfg = {
         .adc_n    = EXAMPLE_ADC_UNIT,
         .channel  = EXAMPLE_ADC_CHANNEL,
@@ -190,17 +209,26 @@ static void init_ulp_program(void)
         .atten    = EXAMPLE_ADC_ATTEN,
         .ulp_mode = ADC_ULP_MODE_FSM,
     };
-    
-
 
     ESP_ERROR_CHECK(ulp_adc_init(&cfg));
 
-    ulp_low_thr = EXAMPLE_ADC_LOW_TRESHOLD;
+
+    /* GPIO used for test. */
+    gpio_num_t gpio_num = GPIO_NUM_2;
+    //int rtcio_num = rtc_io_number_get(gpio_num);
+    //assert(rtc_gpio_is_valid_gpio(gpio_num) && "GPIO used for pulse counting must be an RTC IO");
+
+
+    /* Initialize ulp variables*/
+    ulp_low_thr = EXAMPLE_ADC_LOW_TRESHOLD; 
     ulp_high_thr = EXAMPLE_ADC_HIGH_TRESHOLD;
     ulp_higher_thr = EXAMPLE_ADC_HIGHER_TRESHOLD;
-    
+    ulp_higher_thr = EXAMPLE_ADC_HIGH;
+    //ulp_io_number = rtc_io_desc[gpio_num].rtc_num; /* map from GPIO# to RTC_IO# */
 
-    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
+    /* Initialize selected GPIO as RTC IO, enable input, disable pullup and pulldown */
+    rtc_gpio_init(gpio_num);
+    rtc_gpio_set_direction(gpio_num, RTC_GPIO_MODE_OUTPUT_ONLY);
 
     /* Set ULP wake up period to 1s */
     ulp_set_wakeup_period(0, 1000000);
@@ -214,7 +242,7 @@ static void init_ulp_program(void)
     rtc_gpio_isolate(GPIO_NUM_15);
 #endif // CONFIG_IDF_TARGET_ESP32
 
-    esp_deep_sleep_disable_rom_logging(); // suppress boot messages
+    esp_deep_sleep_disable_rom_logging(); // suppress boot messages   
 }
 
 static void start_ulp_program(void)
@@ -225,4 +253,48 @@ static void start_ulp_program(void)
     /* Start the program */
     esp_err_t err = ulp_run(&ulp_entry - RTC_SLOW_MEM);
     ESP_ERROR_CHECK(err);
+}
+
+//update readings to NVS
+static void update_readings(esp_err_t flash_init)
+{
+    const char* namespace = "ulp";
+    const char* adc_key = "aydeesee";
+
+    ESP_ERROR_CHECK( flash_init ); //init nvs
+    nvs_handle handle;
+    ESP_ERROR_CHECK( nvs_open(namespace, NVS_READWRITE, &handle));
+
+    
+    uint32_t nvs_adc; 
+    esp_err_t err = nvs_get_u32(handle, adc_key, &nvs_adc);
+    assert(err == ESP_OK || err == ESP_ERR_NVS_NOT_FOUND);
+    printf("Reading from NVS: %"PRIu32"\n", nvs_adc);   
+
+    ulp_adc_reading &= UINT16_MAX;
+    nvs_adc = ulp_adc_reading;
+
+    /* Save the new value to NVS */
+    ESP_ERROR_CHECK(nvs_set_u32(handle, adc_key, nvs_adc));
+    ESP_ERROR_CHECK(nvs_commit(handle));
+    nvs_close(handle);
+    printf("Wrote readings to NVS: %"PRIu32"\n", nvs_adc);
+}
+
+//read previous reading from NVS
+static void reclaim_readings(esp_err_t flash_init)
+{
+    const char* namespace = "ulp";
+    const char* adc_key = "aydeesee";
+
+    ESP_ERROR_CHECK( flash_init ); //init nvs
+    nvs_handle handle;
+    ESP_ERROR_CHECK( nvs_open(namespace, NVS_READWRITE, &handle));
+    uint32_t nvs_adc; 
+    esp_err_t err = nvs_get_u32(handle, adc_key, &nvs_adc);
+    assert(err == ESP_OK || err == ESP_ERR_NVS_NOT_FOUND);
+    printf("Reading from NVS: %"PRIu32"\n", nvs_adc);
+    ulp_adc_reading = nvs_adc;
+
+    nvs_close(handle);
 }
