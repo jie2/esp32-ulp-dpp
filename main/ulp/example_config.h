@@ -17,7 +17,7 @@
 /* Set low and high thresholds, approx. 2.80V - 3.00V*/
 #define EXAMPLE_ADC_LOW_TRESHOLD   260 //stable -> hibernate
 #define EXAMPLE_ADC_HIGH_TRESHOLD   260 //wakeup
-#define EXAMPLE_ADC_HIGHER_TRESHOLD   300//negative->hibernate
+#define EXAMPLE_ADC_HIGHER_TRESHOLD   500//negative->hibernate
 #define EXAMPLE_ADC_HIGH   500 //wakeup from stable high, not implemented yet lol
 #endif
 
