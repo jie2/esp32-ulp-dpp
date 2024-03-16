@@ -9,6 +9,8 @@
    and C macros may be used in these files
  */
 #include "soc/rtc_cntl_reg.h"
+#include "soc/rtc_io_reg.h"
+
 #include "soc/soc_ulp.h"
 #include "example_config.h"
 
@@ -65,15 +67,28 @@ temperature_result:
 	.global adc_reading
 adc_reading:
 	.long 0
+  
 
 	.global higher_thr
 higher_thr:
+	.long 0
+
+	/* RTC IO number used to sample the input signal.
+	Set by main program. */
+	.global io_number
+io_number:
 	.long 0
 
 	/* Code goes into .text section */
 	.text
 	.global entry
 entry:
+//ulp heartbeat
+	WRITE_RTC_REG(RTC_GPIO_OUT_REG,RTC_GPIO_OUT_DATA_S+2,1,1)
+	wait 65535
+
+	WRITE_RTC_REG(RTC_GPIO_OUT_REG,RTC_GPIO_OUT_DATA_S+2,1,0)
+	
 	/* increment sample counter */
 	move r3, sample_counter
 	ld r2, r3, 0
@@ -105,7 +120,7 @@ measure:
 	rsh r0, r0, adc_oversampling_factor_log
 	move r3, previous_result
 	st r0, r3, 0
-
+	
 //waits for 4s
 	wait 65535
 	wait 65535
@@ -610,7 +625,8 @@ measure:
 	wait 65535
 	wait 65535
 	wait 65535
-	wait 65535
+	wait 65535	
+
 
 	/* measure next level */
 	adc r1, 1, adc_channel + 1 //saradc2
@@ -654,7 +670,10 @@ measure:
 hibernate:
 	/* ulp puts itself into sleep mode */
 	sleep 0
+	//WRITE_RTC_FIELD(RTC_CNTL_STATE0_REG, RTC_CNTL_ULP_CP_SLP_TIMER_EN, 1) 
+
 	halt  
+
 
 	.global wake_up 
 wake_up:
@@ -665,7 +684,7 @@ wake_up:
 
 	/* Wake up the SoC, end program */
 	wake
-	WRITE_RTC_FIELD(RTC_CNTL_STATE0_REG, RTC_CNTL_ULP_CP_SLP_TIMER_EN, 0)
+	WRITE_RTC_FIELD(RTC_CNTL_STATE0_REG, RTC_CNTL_ULP_CP_SLP_TIMER_EN, 0) //disables the timer
 	halt
 
 	/* value within range, end the program */
