@@ -1,7 +1,9 @@
 | Supported Targets | ESP32 | ESP32-S2 |
 | ----------------- | ----- | -------- |
 
-# ULP DPP V2
+# ULP DPP V2.1.2
+
+V2.1.2: Added NVS storage
 
 Based on the ULP ADC example, this board goes into deep sleep and wakes up at increasing voltage levels (SOC measured at >50), around >3.1V. Two voltage measurements are taken with 4.08s time interval in-between, and a value for SOC is calculated by subtracting the two values. This determines if the supply is increasing or decreasing, and has the system adjust states between deep-sleep and active mode accordingly.
 
