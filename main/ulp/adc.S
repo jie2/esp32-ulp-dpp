@@ -106,6 +106,13 @@ measure:
 	move r3, previous_result
 	st r0, r3, 0
 
+	/* compare with low;  hibernate if the value is too low */
+	move r3, 1200
+	ld r3, r3, 0
+	move r0, 0
+	sub r3, r0, r3
+	jump hibernate1 , ov 
+
 //waits for 680ms
 	wait 65535
 	wait 65535
@@ -657,7 +664,6 @@ measure:
 	sub r3, r3, r0
 	jump wake_up , ov 
 
-
 	jump hibernate1
 
 	.global hibernate1 //stable
@@ -665,7 +671,6 @@ hibernate1:
 	/* ulp puts itself into sleep mode */
 	sleep 0
 	halt  
-
 
 	.global hibernate2 //discharge
 hibernate2:
