@@ -3,7 +3,8 @@
 
 # ULP DPP V2.1.2
 
-V2.1.2: Added NVS storage
+V2.1.2: Added NVS storage and an array of data storage for past 5 cycles.
+Note: Due to the ULP file being automated by esp32ulp_mapgen.py utility, the adc_reading array will have to be manually declared in the ulp_main.h file for multiple flashes.
 
 Based on the ULP ADC example, this board goes into deep sleep and wakes up at increasing voltage levels (SOC measured at >50), around >3.1V. Two voltage measurements are taken with 4.08s time interval in-between, and a value for SOC is calculated by subtracting the two values. This determines if the supply is increasing or decreasing, and has the system adjust states between deep-sleep and active mode accordingly.
 
