@@ -48,8 +48,10 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
+#define STORAGE_SIZE 5
+
 //rainmaker repos, definition for test purposes
-//#define RAINMAKER
+#define RAINMAKER
 
 #ifdef RAINMAKER
 
@@ -109,8 +111,7 @@ void app_main()
         printf("Not ULP wakeup\n");
         reclaim_readings(err); //reclaim prev readings from NVS
         printf("ULP did %"PRIu32" measurements since last reset\n", ulp_sample_counter & UINT16_MAX);
-        printf("Value=%"PRIu32" was measured on ADC.\n", ulp_adc_reading);
-
+        
         init_ulp_program();
     } else {
         printf("Deep sleep wakeup\n");
@@ -118,7 +119,6 @@ void app_main()
         printf("Thresholds:  low=%"PRIu32"  high=%"PRIu32"\n", ulp_low_thr, ulp_high_thr);
         ulp_last_result &= UINT16_MAX;
         ulp_previous_result &= UINT16_MAX;
-        ulp_adc_reading &= UINT16_MAX;
 
         printf("Value=%"PRIu32" was the previous result.\n", ulp_previous_result);
         printf("Value=%"PRIu32" was the last result, it is %s threshold\n", ulp_last_result,
@@ -126,7 +126,14 @@ void app_main()
                 
         printf("Value=%"PRIu32" is the SOC\n", ulp_charge_state);
 
-        printf("Value=%"PRIu32" was measured on ADC.\n", ulp_adc_reading);
+        printf("The recorded adc readings from the ULP are: \n");
+        for(int i=0;i<STORAGE_SIZE;i++)
+        {
+            ulp_adc_reading[i] &= UINT16_MAX;
+            printf("Value=%"PRIu32" at [%d]\n", ulp_adc_reading[i],i);
+        }
+
+        
         printf("Value=%"PRIu32" was the temperature value sensed.\n", ulp_temperature_result & UINT16_MAX);
         update_readings(err); //update new readings to NVS
     } 
@@ -150,8 +157,9 @@ void app_main()
 
     
     /* Create a device and add the relevant parameters to it */
-    dpp_device = esp_rmaker_temp_sensor_device_create("DPP Sensor", NULL, app_get_measurement());
+    dpp_device = esp_rmaker_temp_sensor_device_create("DPP Sensor", NULL , app_get_measurement());
     esp_rmaker_device_add_param(dpp_device, esp_rmaker_param_create("ADC", NULL, esp_rmaker_float(true), PROP_FLAG_READ | PROP_FLAG_SIMPLE_TIME_SERIES));
+    esp_rmaker_device_add_param(dpp_device, esp_rmaker_param_create("Past ADC Readings", NULL, esp_rmaker_array("[]"),PROP_FLAG_READ));
     esp_rmaker_device_add_param(dpp_device, esp_rmaker_param_create("State of Charge", NULL, esp_rmaker_float(true), PROP_FLAG_READ | PROP_FLAG_TIME_SERIES));
 
     esp_rmaker_node_add_device(node, dpp_device);
@@ -230,6 +238,10 @@ static void init_ulp_program(void)
     rtc_gpio_init(gpio_num);
     rtc_gpio_set_direction(gpio_num, RTC_GPIO_MODE_OUTPUT_ONLY);
 
+
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
+
+
     /* Set ULP wake up period to 1s */
     ulp_set_wakeup_period(0, 1000000);
 
@@ -256,45 +268,69 @@ static void start_ulp_program(void)
 }
 
 //update readings to NVS
-static void update_readings(esp_err_t flash_init)
+static void update_readings(esp_err_t err)
 {
     const char* namespace = "ulp";
     const char* adc_key = "aydeesee";
 
-    ESP_ERROR_CHECK( flash_init ); //init nvs
+    ESP_ERROR_CHECK(err); //init nvs
     nvs_handle handle;
     ESP_ERROR_CHECK( nvs_open(namespace, NVS_READWRITE, &handle));
 
-    
-    uint32_t nvs_adc; 
-    esp_err_t err = nvs_get_u32(handle, adc_key, &nvs_adc);
+    size_t size = sizeof(uint16_t);
+    err = nvs_get_blob(handle,adc_key, NULL, &size);  
+    uint16_t* aydeesee = malloc(size);
+
+
     assert(err == ESP_OK || err == ESP_ERR_NVS_NOT_FOUND);
-    printf("Reading from NVS: %"PRIu32"\n", nvs_adc);   
 
-    ulp_adc_reading &= UINT16_MAX;
-    nvs_adc = ulp_adc_reading;
 
+    for(int i=0;i<STORAGE_SIZE;i++)
+    {
+        ulp_adc_reading[i] &= UINT16_MAX;
+        aydeesee[i] = ulp_adc_reading[i];
+    }
+    
     /* Save the new value to NVS */
-    ESP_ERROR_CHECK(nvs_set_u32(handle, adc_key, nvs_adc));
+    ESP_ERROR_CHECK(nvs_set_blob(handle, adc_key, aydeesee, size));
     ESP_ERROR_CHECK(nvs_commit(handle));
     nvs_close(handle);
-    printf("Wrote readings to NVS: %"PRIu32"\n", nvs_adc);
+    //Print what was saved
+    for(int i=0;i<STORAGE_SIZE;i++)
+    {
+        printf("Wrote readings to NVS: %u\n", aydeesee[i]);
+    }
+    
 }
 
 //read previous reading from NVS
-static void reclaim_readings(esp_err_t flash_init)
+static void reclaim_readings(esp_err_t err)
 {
     const char* namespace = "ulp";
     const char* adc_key = "aydeesee";
 
-    ESP_ERROR_CHECK( flash_init ); //init nvs
+    ESP_ERROR_CHECK( err ); //init nvs
     nvs_handle handle;
     ESP_ERROR_CHECK( nvs_open(namespace, NVS_READWRITE, &handle));
-    uint32_t nvs_adc; 
-    esp_err_t err = nvs_get_u32(handle, adc_key, &nvs_adc);
-    assert(err == ESP_OK || err == ESP_ERR_NVS_NOT_FOUND);
-    printf("Reading from NVS: %"PRIu32"\n", nvs_adc);
-    ulp_adc_reading = nvs_adc;
+    
+    size_t size = sizeof(uint16_t);
+    err = nvs_get_blob(handle,adc_key, NULL, &size); 
+    uint16_t* aydeesee = malloc(size);
+ 
+    err = nvs_get_blob(handle, adc_key, aydeesee, &size);
 
+    assert(err == ESP_OK || err == ESP_ERR_NVS_NOT_FOUND);
+
+    for(int i=0;i<STORAGE_SIZE;i++)
+    {
+        printf("Reading from NVS: %u\n", aydeesee[i]);
+    }
+
+    for(int i=0;i<STORAGE_SIZE;i++)
+    {
+        ulp_adc_reading[i] = aydeesee[i];
+    }
+    
     nvs_close(handle);
 }
+
