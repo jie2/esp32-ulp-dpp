@@ -54,11 +54,15 @@ previous_result:
 	.global last_result
 last_result:
 	.long 0
+	.long 0
+	.long 0
+	.long 0
+	.long 0
 
 	.global charge_state
 charge_state:
 	.long 0
-
+	
 	/*store random reading from temperature sensor*/
 	.global temperature_result
 temperature_result:
@@ -73,6 +77,10 @@ adc_reading:
 higher_thr:
 	.long 0
 
+	.global offset
+offset:
+	.long 0
+
 	/* RTC IO number used to sample the input signal.
 	Set by main program. */
 	.global io_number
@@ -84,10 +92,11 @@ io_number:
 	.global entry
 entry:
 //ulp heartbeat
+	
 	WRITE_RTC_REG(RTC_GPIO_OUT_REG,RTC_GPIO_OUT_DATA_S+2,1,1)
 	wait 65535
-
 	WRITE_RTC_REG(RTC_GPIO_OUT_REG,RTC_GPIO_OUT_DATA_S+2,1,0)
+	
 	
 	/* increment sample counter */
 	move r3, sample_counter
@@ -108,11 +117,21 @@ measure:
 	st r1, r3, 0
 	*/
 
-	adc r1, 1, adc_channel + 3 //saradc2
+	adc r1, 1, adc_channel + 3 //saradc1
 	add r0, r0, r1
 	rsh r0, r0, adc_oversampling_factor_log
 	move r3, adc_reading
-	st r0, r3, 0
+	move r1, offset 
+	ld r1, r1, 0 
+	add r3, r3, r1 
+	st r0, r3, 0 
+
+	/* increment offset */
+	move r3, offset
+	move r1, 0
+	ld r1, r3, 0
+	add r1, r1, 1
+	st r1, r3, 0
 
 	/* measure first level */
 	adc r1, 1, adc_channel + 1 //saradc2
@@ -673,8 +692,7 @@ hibernate:
 	//WRITE_RTC_FIELD(RTC_CNTL_STATE0_REG, RTC_CNTL_ULP_CP_SLP_TIMER_EN, 1) 
 
 	halt  
-
-
+	
 	.global wake_up 
 wake_up:
 	/* Check if the system can be woken up */
